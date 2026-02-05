@@ -169,44 +169,26 @@ jobs:
             print(f'Status: {status}')
             
             if status == 'critical':
-                print('❌ Évaluation critique - Intervention requise')
+                print('Évaluation critique - Intervention requise')
                 exit(1)
             elif status == 'warning':
-                print('⚠️  Évaluation avec alertes')
+                print('Évaluation avec alertes')
                 exit(0)
             else:
-                print('✅ Évaluation réussie')
+                print('Évaluation réussie')
                 exit(0)
         "
 
-  lint:
-    name: Linting et Formatage
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout du code
-      uses: actions/checkout@v4
-    
-    - name: Configuration Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    
-    - name: Linting désactivé
-      run: |
-        echo "Linting désactivé: Ruff supprimé du pipeline."
-
   rapport-qualite:
-    name: Rapport de Qualité Global
+    name: Résumé des tests
     runs-on: ubuntu-latest
-    needs: [tests-unitaires, tests-integration, lint]
+    needs: [tests-unitaires, tests-integration]
     if: always()
     
     steps:
-    - name: Génération du badge de qualité
+    - name: Génération du résumé des tests
       run: |
-        echo "✅ Pipeline de qualité complété" >> $GITHUB_STEP_SUMMARY
+        echo "Pipeline de qualité complété" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "## Résumé des tests" >> $GITHUB_STEP_SUMMARY
         echo "- Tests unitaires: ${{ needs.tests-unitaires.result }}" >> $GITHUB_STEP_SUMMARY
