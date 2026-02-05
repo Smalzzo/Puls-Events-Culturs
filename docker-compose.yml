@@ -1,0 +1,44 @@
+services:
+  rag-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: puls-events-rag
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persister les données
+      - ./data:/app/data
+      - ./logs:/app/logs
+      # Montage du code en dev (optionnel, pour hot-reload)
+      - ./src:/app/src
+      - ./api:/app/api
+    environment:
+      # Variables d'environnement
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - OPENAGENDA_API_KEY=${OPENAGENDA_API_KEY}
+      - OPENAGENDA_AGENDA_UID=${OPENAGENDA_AGENDA_UID}
+      - USE_MISTRAL_EMBEDDINGS=${USE_MISTRAL_EMBEDDINGS:-true}
+      - MISTRAL_EMBEDDING_MODEL=${MISTRAL_EMBEDDING_MODEL:-mistral-embed-2312}
+      - HUGGINGFACE_EMBEDDING_MODEL=${HUGGINGFACE_EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      - MISTRAL_MODEL_NAME=${MISTRAL_MODEL_NAME:-ministral-14b-2512}
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - ENVIRONMENT=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s  # Temps pour construire l'index au premier démarrage
+
+networks:
+  rag-network:
+    driver: bridge
+
+volumes:
+  faiss-index:
+    driver: local
+  app-logs:
+    driver: local

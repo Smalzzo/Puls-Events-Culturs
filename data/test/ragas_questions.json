@@ -1,0 +1,42 @@
+[
+  {
+    "question": "Quelle est l'adresse du FIAP Jean Monnet ?",
+    "ground_truth": "30 rue Cabanis, 75014 Paris"
+  },
+  {
+    "question": "Dans quelle ville se trouve DISNEY'S HOTEL CHEYENNE ?",
+    "ground_truth": "Coupvray"
+  },
+  {
+    "question": "Quel est l'âge maximum accepté au Gîte aux Écuries d'Auvers-sur-Oise ?",
+    "ground_truth": "15"
+  },
+  {
+    "question": "Quel est le site web officiel de la Résidence internationale de Paris ?",
+    "ground_truth": "http://www.residence-paris.com"
+  },
+  {
+    "question": "Quel est le département de Le Rocheton YMCA ?",
+    "ground_truth": "Seine-et-Marne"
+  },
+  {
+    "question": "À quelle adresse se situe DISNEY'S HOTEL NEW YORK THE ART OF MARVEL ?",
+    "ground_truth": "Avenue René Goscinny, 77700 Chessy"
+  },
+  {
+    "question": "Quel est le code postal de la Résidence internationale de Paris ?",
+    "ground_truth": "75020"
+  },
+  {
+    "question": "Quel est l'âge minimum requis pour DISNEY'S HOTEL SEQUOIA LODGE ?",
+    "ground_truth": "3"
+  },
+  {
+    "question": "Quel établissement est situé à Paris dans le 14ème arrondissement ?",
+    "ground_truth": "FIAP Jean Monnet"
+  },
+  {
+    "question": "Dans quelle ville se trouve le Gîte aux Écuries d'Auvers-sur-Oise ?",
+    "ground_truth": "Auvers-sur-Oise"
+  }
+]

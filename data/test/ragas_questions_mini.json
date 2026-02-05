@@ -1,0 +1,10 @@
+[
+  {
+    "question": "Quels sont les événements culturels à Paris ce weekend ?",
+    "ground_truth": "Liste d'événements culturels actuels à Paris"
+  },
+  {
+    "question": "Y a-t-il des concerts gratuits en Île-de-France ?",
+    "ground_truth": "Informations sur les concerts gratuits disponibles"
+  }
+]
