@@ -328,24 +328,7 @@ make clean          # Nettoyer les fichiers temporaires
    git push origin feature/ma-feature
    ```
 
-### VS Code Tasks
 
-Utilisez `Ctrl+Shift+P` → "Tasks: Run Task" pour:
-- **Bootstrap: Create venv & Install**: Setup complet
-- **Install: Dependencies**: Réinstaller les dépendances
-- **Lint: Ruff Check**: Vérifier le code
-- **Format: Ruff Format**: Formater le code
-- **Test: Run All Tests**: Lancer tous les tests
-- **Build: Index from OpenAgenda**: Construire l'index
-- **Run: API Server**: Démarrer l'API
-
-### Debugging dans VS Code
-
-Utilisez `F5` ou le panneau "Run and Debug" pour:
-- **FastAPI: Run API Server**: Debug l'API avec breakpoints
-- **Python: Build Index**: Debug le script de build d'index
-- **Pytest: Run All Tests**: Debug tous les tests
-- **Pytest: Current File**: Debug le fichier de test actuel
 
 ## Docker
 
@@ -629,30 +612,4 @@ pip install -e .
 python3.11 -m venv .venv
 ```
 
-## Licence
 
-MIT
-
-## Auteurs
-
-Votre équipe MLOps
-
-## Contributing
-
-Les contributions sont les bienvenues! Veuillez:
-1. Créer une issue pour discuter des changements
-2. Fork le projet
-3. Créer une branche feature
-4. Commiter vos changements
-5. Pousser vers la branche
-6. Ouvrir une Pull Request
-
----
-
-**Note**: Ce projet est un POC (Proof of Concept). Pour une utilisation en production, pensez à:
-- Ajouter de l'authentification API
-- Configurer CORS correctement
-- Mettre en place du rate limiting
-- Ajouter du monitoring (Prometheus, Grafana)
-- Utiliser un serveur de production (Gunicorn)
-- Configurer des backups de l'index FAISS
