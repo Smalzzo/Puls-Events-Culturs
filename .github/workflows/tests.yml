@@ -42,8 +42,8 @@ jobs:
         flags: unittests
         name: codecov-umbrella
 
-  tests-integration:
-    name: Tests d'Intégration
+  tests-fonctionnels:
+    name: Tests Fonctionnels (API)
     runs-on: ubuntu-latest
     needs: tests-unitaires
     
@@ -61,21 +61,29 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e .
-        pip install pytest pytest-mock
+        pip install pytest requests
     
-    - name: Exécution des tests d'intégration
+    - name: Démarrage de l'API
       run: |
-        pytest -m "integration" -v
-
-  tests-performance:
-    name: Tests Unitaires (push/schedule)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'schedule'
-    needs: tests-unitaires
-    steps:
-    - name: Skip (unitaires déjà exécutés)
+        nohup python -m uvicorn api.main:app --host 127.0.0.1 --port 8000 > uvicorn.log 2>&1 &
+    
+    - name: Attente du démarrage de l'API
       run: |
-        echo "Tests unitaires déjà exécutés par le job tests-unitaires."
+        for i in {1..30}; do
+          if curl -s http://127.0.0.1:8000/health > /dev/null; then
+            echo "API prête"
+            exit 0
+          fi
+          sleep 2
+        done
+        echo "API non disponible"
+        echo "Logs:"
+        tail -n 200 uvicorn.log || true
+        exit 1
+    
+    - name: Exécution des tests fonctionnels
+      run: |
+        pytest -m "functional" -v
 
   evaluation-ragas:
     name: Évaluation RAGAS Automatisée
@@ -156,7 +164,7 @@ jobs:
   rapport-qualite:
     name: Résumé des tests
     runs-on: ubuntu-latest
-    needs: [tests-unitaires, tests-integration]
+    needs: [tests-unitaires, tests-fonctionnels]
     if: always()
     
     steps:
