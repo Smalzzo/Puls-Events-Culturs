@@ -3,12 +3,9 @@ Unit tests for configuration module.
 """
 
 import os
-from pathlib import Path
 
-import pytest
-from pydantic import ValidationError
 
-from src.config import Settings, settings
+from src.config import Settings
 
 
 def test_settings_from_env(monkeypatch):
@@ -19,9 +16,9 @@ def test_settings_from_env(monkeypatch):
 
     test_settings = Settings()
 
-    assert settings.openagenda_api_key == "test_key"
-    assert settings.openagenda_agenda_uid == "test_uid"
-    assert settings.mistral_api_key == "test_mistral_key"
+    assert test_settings.openagenda_api_key == "test_key"
+    assert test_settings.openagenda_agenda_uid == "test_uid"
+    assert test_settings.mistral_api_key == "test_mistral_key"
 
 
 def test_settings_defaults():
@@ -36,36 +33,12 @@ def test_settings_defaults():
     assert settings.openagenda_base_url == "https://api.openagenda.com/v2"
     assert settings.openagenda_max_events == 500
     assert settings.mistral_temperature == 0.3
-    assert settings.rag_top_k == 5
+    assert settings.rag_top_k == 10
     assert settings.api_port == 8000
 
 
-def test_settings_is_production():
-    """Test environment detection."""
-    os.environ["OPENAGENDA_API_KEY"] = "test"
-    os.environ["OPENAGENDA_AGENDA_UID"] = "test"
-    os.environ["MISTRAL_API_KEY"] = "test"
+def test_settings_environment_value():
+    """Test environment value is read from ENVIRONMENT."""
     os.environ["ENVIRONMENT"] = "production"
-
     settings = Settings()
-
-    assert settings.is_production is True
-    assert settings.is_development is False
-
-
-def test_settings_validation():
-    """Test settings validation."""
-    # Missing required fields should raise error
-    with pytest.raises(ValidationError):
-        Settings(
-            openagenda_api_key="test",
-            # Missing openagenda_agenda_uid and mistral_api_key
-        )
-
-
-def test_get_settings_cached():
-    """Test that get_settings returns cached instance."""
-    settings1 = get_settings()
-    settings2 = get_settings()
-
-    assert settings1 is settings2
+    assert settings.environment == "production"

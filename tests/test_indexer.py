@@ -7,8 +7,8 @@ import pytest
 from src.chunking import EventChunker
 
 
-def test_event_to_text():
-    """Test event to text conversion."""
+def test_create_chunks_basic():
+    """Test creating chunks from a single event."""
     chunker = EventChunker()
 
     event = {
@@ -16,23 +16,19 @@ def test_event_to_text():
         "description_fr": "Un super concert",
         "location_name": "Salle Pleyel",
         "keywords_fr": ["jazz", "musique"],
-        "uid": "test_1"
+        "location_city": "Paris",
+        "location_region": "Île-de-France",
+        "uid": "test_1",
+        "firstdate_begin": "2026-01-10T19:00:00",
     }
 
-    text = chunker.event_to_text(event)
+    documents = chunker.create_chunks([event])
 
-    assert "Concert de Jazz" in text
-    assert "Un super concert" in text
-    assert "Salle Pleyel" in text
-    assert "jazz" in text
-
-
-def test_event_to_text_empty():
-    """Test event to text with empty event."""
-    chunker = EventChunker()
-    event = {}
-    text = chunker.event_to_text(event)
-    assert text == ""
+    assert len(documents) >= 2
+    assert all(hasattr(doc, "metadata") for doc in documents)
+    assert all("event_id" in doc.metadata for doc in documents)
+    assert any(doc.metadata.get("chunk_type") == "main" for doc in documents)
+    assert any(doc.metadata.get("chunk_type") == "practical" for doc in documents)
 
 
 def test_create_chunks():
