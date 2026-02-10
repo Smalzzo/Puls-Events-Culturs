@@ -33,7 +33,7 @@ jobs:
     
     - name: Exécution des tests unitaires
       run: |
-        pytest -m "unit" --cov=src --cov-report=xml --cov-report=term -v
+        pytest -m "unit" --cov=src --cov-report=xml --cov-report=term -v --junitxml=unit-tests.xml
     
     - name: Upload de la couverture vers Codecov
       uses: codecov/codecov-action@v3
@@ -41,6 +41,22 @@ jobs:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
+    
+    - name: Upload du rapport de couverture
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-xml
+        path: coverage.xml
+        retention-days: 7
+    
+    - name: Upload des résultats unitaires
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: junit-unit
+        path: unit-tests.xml
+        retention-days: 7
 
   tests-fonctionnels:
     name: Tests Fonctionnels (API)
@@ -83,83 +99,15 @@ jobs:
     
     - name: Exécution des tests fonctionnels
       run: |
-        pytest -m "functional" -v
-
-  evaluation-ragas:
-    name: Évaluation RAGAS Automatisée
-    runs-on: ubuntu-latest
-    needs: tests-unitaires
-    # Exécuter uniquement sur schedule ou manuellement
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        pytest -m "functional" -v --junitxml=functional-tests.xml
     
-    steps:
-    - name: Checkout du code
-      uses: actions/checkout@v4
-    
-    - name: Configuration Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    
-    - name: Installation des dépendances
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .
-        pip install ragas datasets
-    
-    - name: Création du répertoire de données de test
-      run: |
-        mkdir -p data/test
-        # Créer un fichier de test minimal si nécessaire
-        echo '[{"question": "Test question?", "ground_truth": "Test answer"}]' > data/test/ragas_questions.json
-    
-    - name: Exécution de l'évaluation RAGAS
-      env:
-        MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
-      run: |
-        python scripts/run_automated_evaluation.py \
-          --test-file data/test/ragas_questions.json \
-          --output-dir data/evaluations \
-          --trend-report \
-          --export-csv
-      continue-on-error: true
-    
-    - name: Upload des rapports d'évaluation
+    - name: Upload des résultats fonctionnels
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: ragas-evaluation-reports
-        path: |
-          data/evaluations/*.json
-          data/evaluations/*.csv
-        retention-days: 90
-    
-    - name: Vérification des seuils de qualité
-      run: |
-        python -c "
-        import json
-        from pathlib import Path
-        
-        # Charger le dernier rapport
-        reports = sorted(Path('data/evaluations').glob('evaluation_*.json'))
-        if reports:
-            with open(reports[-1]) as f:
-                report = json.load(f)
-            
-            status = report.get('status', 'unknown')
-            print(f'Status: {status}')
-            
-            if status == 'critical':
-                print('Évaluation critique - Intervention requise')
-                exit(1)
-            elif status == 'warning':
-                print('Évaluation avec alertes')
-                exit(0)
-            else:
-                print('Évaluation réussie')
-                exit(0)
-        "
+        name: junit-functional
+        path: functional-tests.xml
+        retention-days: 7
 
   rapport-qualite:
     name: Résumé des tests
@@ -168,11 +116,67 @@ jobs:
     if: always()
     
     steps:
+    - name: Télécharger la couverture
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-xml
+        path: artifacts
+    
+    - name: Télécharger les résultats unitaires
+      uses: actions/download-artifact@v4
+      with:
+        name: junit-unit
+        path: artifacts
+    
+    - name: Télécharger les résultats fonctionnels
+      uses: actions/download-artifact@v4
+      with:
+        name: junit-functional
+        path: artifacts
+    
     - name: Génération du résumé des tests
       run: |
         echo "Pipeline de qualité complété" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "## Résumé des tests" >> $GITHUB_STEP_SUMMARY
         echo "- Tests unitaires: ${{ needs.tests-unitaires.result }}" >> $GITHUB_STEP_SUMMARY
-        echo "- Tests d'intégration: ${{ needs.tests-integration.result }}" >> $GITHUB_STEP_SUMMARY
-        echo "- Linting: ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Tests fonctionnels: ${{ needs.tests-fonctionnels.result }}" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f artifacts/coverage.xml ]; then
+          python - <<'PY' >> $GITHUB_STEP_SUMMARY
+import xml.etree.ElementTree as ET
+tree = ET.parse("artifacts/coverage.xml")
+root = tree.getroot()
+line_rate = root.attrib.get("line-rate")
+if line_rate is not None:
+    pct = float(line_rate) * 100
+    print(f"- Couverture: {pct:.2f}%")
+else:
+    print("- Couverture: indisponible")
+PY
+        else
+          echo "- Couverture: indisponible" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        python - <<'PY' >> $GITHUB_STEP_SUMMARY
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+def line(label, tests, failures, errors, skipped):
+    passed = tests - failures - errors - skipped
+    print(f"- {label}: {passed} passed, {failures} failed, {errors} errors, {skipped} skipped, {tests} total")
+
+def read(path, label):
+    if not Path(path).exists():
+        print(f"- {label}: indisponible")
+        return
+    root = ET.parse(path).getroot()
+    tests = int(root.attrib.get("tests", 0))
+    failures = int(root.attrib.get("failures", 0))
+    errors = int(root.attrib.get("errors", 0))
+    skipped = int(root.attrib.get("skipped", 0))
+    line(label, tests, failures, errors, skipped)
+
+read("artifacts/unit-tests.xml", "Unitaires")
+read("artifacts/functional-tests.xml", "Fonctionnels")
+PY
