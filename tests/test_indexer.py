@@ -6,6 +6,8 @@ import pytest
 
 from src.chunking import EventChunker
 
+pytestmark = pytest.mark.unit
+
 
 def test_create_chunks_basic():
     """Test creating chunks from a single event."""
