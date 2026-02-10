@@ -144,39 +144,39 @@ jobs:
         
         if [ -f artifacts/coverage.xml ]; then
           python - <<'PY' >> $GITHUB_STEP_SUMMARY
-import xml.etree.ElementTree as ET
-tree = ET.parse("artifacts/coverage.xml")
-root = tree.getroot()
-line_rate = root.attrib.get("line-rate")
-if line_rate is not None:
-    pct = float(line_rate) * 100
-    print(f"- Couverture: {pct:.2f}%")
-else:
-    print("- Couverture: indisponible")
-PY
+        import xml.etree.ElementTree as ET
+        tree = ET.parse("artifacts/coverage.xml")
+        root = tree.getroot()
+        line_rate = root.attrib.get("line-rate")
+        if line_rate is not None:
+            pct = float(line_rate) * 100
+            print(f"- Couverture: {pct:.2f}%")
+        else:
+            print("- Couverture: indisponible")
+        PY
         else
           echo "- Couverture: indisponible" >> $GITHUB_STEP_SUMMARY
         fi
         
         python - <<'PY' >> $GITHUB_STEP_SUMMARY
-import xml.etree.ElementTree as ET
-from pathlib import Path
-
-def line(label, tests, failures, errors, skipped):
-    passed = tests - failures - errors - skipped
-    print(f"- {label}: {passed} passed, {failures} failed, {errors} errors, {skipped} skipped, {tests} total")
-
-def read(path, label):
-    if not Path(path).exists():
-        print(f"- {label}: indisponible")
-        return
-    root = ET.parse(path).getroot()
-    tests = int(root.attrib.get("tests", 0))
-    failures = int(root.attrib.get("failures", 0))
-    errors = int(root.attrib.get("errors", 0))
-    skipped = int(root.attrib.get("skipped", 0))
-    line(label, tests, failures, errors, skipped)
-
-read("artifacts/unit-tests.xml", "Unitaires")
-read("artifacts/functional-tests.xml", "Fonctionnels")
-PY
+        import xml.etree.ElementTree as ET
+        from pathlib import Path
+        
+        def line(label, tests, failures, errors, skipped):
+            passed = tests - failures - errors - skipped
+            print(f"- {label}: {passed} passed, {failures} failed, {errors} errors, {skipped} skipped, {tests} total")
+        
+        def read(path, label):
+            if not Path(path).exists():
+                print(f"- {label}: indisponible")
+                return
+            root = ET.parse(path).getroot()
+            tests = int(root.attrib.get("tests", 0))
+            failures = int(root.attrib.get("failures", 0))
+            errors = int(root.attrib.get("errors", 0))
+            skipped = int(root.attrib.get("skipped", 0))
+            line(label, tests, failures, errors, skipped)
+        
+        read("artifacts/unit-tests.xml", "Unitaires")
+        read("artifacts/functional-tests.xml", "Fonctionnels")
+        PY
