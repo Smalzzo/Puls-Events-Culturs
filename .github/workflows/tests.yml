@@ -137,7 +137,7 @@ jobs:
     
     - name: Génération du résumé des tests
       run: |
-        echo "Pipeline de qualité complété" >> $GITHUB_STEP_SUMMARY
+        echo "Pipeline des tests complété" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "## Résumé des tests" >> $GITHUB_STEP_SUMMARY
         echo "- Tests unitaires: ${{ needs.tests-unitaires.result }}" >> $GITHUB_STEP_SUMMARY
@@ -172,10 +172,16 @@ jobs:
                 print(f"- {label}: indisponible")
                 return
             root = ET.parse(path).getroot()
-            tests = int(root.attrib.get("tests", 0))
-            failures = int(root.attrib.get("failures", 0))
-            errors = int(root.attrib.get("errors", 0))
-            skipped = int(root.attrib.get("skipped", 0))
+            # Support both <testsuite> and <testsuites>
+            suites = []
+            if root.tag == "testsuite":
+                suites = [root]
+            else:
+                suites = list(root.iter("testsuite"))
+            tests = sum(int(s.attrib.get("tests", 0)) for s in suites)
+            failures = sum(int(s.attrib.get("failures", 0)) for s in suites)
+            errors = sum(int(s.attrib.get("errors", 0)) for s in suites)
+            skipped = sum(int(s.attrib.get("skipped", 0)) for s in suites)
             line(label, tests, failures, errors, skipped)
         
         read("artifacts/unit-tests.xml", "Unitaires")
