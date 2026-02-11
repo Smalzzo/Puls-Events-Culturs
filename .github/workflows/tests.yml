@@ -18,6 +18,8 @@ jobs:
     steps:
     - name: Checkout du code
       uses: actions/checkout@v4
+      with:
+        lfs: true
     
     - name: Configuration Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
@@ -67,6 +69,8 @@ jobs:
     steps:
     - name: Checkout du code
       uses: actions/checkout@v4
+      with:
+        lfs: true
     
     - name: Configuration Python
       uses: actions/setup-python@v5
