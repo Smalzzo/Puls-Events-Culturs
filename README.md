@@ -1,4 +1,4 @@
-# Puls Events Culturs - RAG POC
+﻿# Puls Events Culturs - RAG POC
 
 POC de recherche sémantique sur événements culturels utilisant RAG (Retrieval-Augmented Generation) avec LangChain, Mistral AI, et FAISS.
 
@@ -225,49 +225,59 @@ curl http://localhost:8000/stats
 
 ```
 Puls-Events-Culturs/
-├── .vscode/                    # Configuration VS Code
-│   ├── settings.json          # Paramètres Python, Ruff, Pytest
-│   ├── launch.json            # Configurations de debug
-│   └── tasks.json             # Tâches (bootstrap, lint, test, run)
-│
-├── api/                        # Application FastAPI
-│   ├── __init__.py
-│   └── main.py                # Endpoints API
-│
-├── src/                        # Code source principal
-│   ├── __init__.py
-│   ├── config.py              # Configuration (Pydantic Settings)
-│   ├── logger.py              # Configuration logging
-│   ├── indexer.py             # Fetcher OpenAgenda + FAISS builder
-│   └── rag.py                 # Système RAG (LangChain + Mistral)
-│
-├── scripts/                    # Scripts utilitaires
-│   ├── bootstrap.ps1          # Bootstrap Windows
-│   ├── bootstrap.sh           # Bootstrap Linux/Mac
-│   └── build_index.py         # Script de build d'index
-│
-├── tests/                      # Tests unitaires
-│   ├── __init__.py            # Configuration pytest
-│   ├── test_config.py         # Tests configuration
-│   ├── test_api.py            # Tests API
-│   └── test_indexer.py        # Tests indexer
-│
-├── data/                       # Données et index
-│   ├── raw/                   # Données brutes (events.json)
-│   ├── processed/             # Données traitées
-│   └── index/                 # Index FAISS
-│
-├── docs/                       # Documentation
-├── notebooks/                  # Jupyter notebooks (exploration)
-├── logs/                       # Fichiers de logs
-│
-├── .env.example               # Template de configuration
-├── .gitignore                 # Fichiers à ignorer
-├── pyproject.toml             # Configuration projet + dépendances
-├── Makefile                   # Commandes make
-├── Dockerfile                 # Image Docker
-├── docker-compose.yml         # Orchestration Docker
-└── README.md                  # Ce fichier
+|-- .github/                    # Workflows CI
+|-- .vscode/                    # Configuration VS Code
+|   |-- settings.json           # Parametres Python, Ruff, Pytest
+|   |-- launch.json             # Configurations de debug
+|   `-- tasks.json              # Taches (bootstrap, lint, test, run)
+|
+|-- api/                        # Application FastAPI
+|   |-- __init__.py
+|   `-- main.py                 # Endpoints API
+|
+|-- src/                        # Code source principal
+|   |-- __init__.py
+|   |-- config.py               # Configuration (Pydantic Settings)
+|   |-- logger.py               # Configuration logging
+|   |-- indexer.py              # Fetcher OpenAgenda + FAISS builder
+|   `-- rag.py                  # Systeme RAG (LangChain + Mistral)
+|
+|-- scripts/                    # Scripts utilitaires
+|   |-- bootstrap.ps1           # Bootstrap Windows
+|   |-- bootstrap.sh            # Bootstrap Linux/Mac
+|   |-- build_index.py          # Script de build d'index
+|   |-- run_tests.ps1           # Lancer les tests (Windows)
+|   `-- run_automated_evaluation.py
+|
+|-- tests/                      # Tests unitaires et fonctionnels
+|   |-- __init__.py
+|   |-- conftest.py             # Fixtures pytest
+|   |-- test_api.py             # Tests API
+|   |-- test_config.py          # Tests configuration
+|   |-- test_functional_api.py  # Tests fonctionnels API
+|   `-- test_indexer.py         # Tests indexer
+|
+|-- data/                       # Donnees et index
+|   |-- raw/                    # Donnees brutes (events.json)
+|   |-- processed/              # Donnees traitees
+|   |-- index/                  # Index FAISS
+|   `-- test/                   # Donnees de test
+|
+|-- docs/                       # Documentation
+|-- notebooks/                  # Jupyter notebooks (exploration)
+|-- logs/                       # Fichiers de logs
+|
+|-- .env                        # Variables locales (non versionne)
+|-- .env.example                # Template de configuration
+|-- .gitattributes              # Git LFS (index FAISS)
+|-- .gitignore                  # Fichiers a ignorer
+|-- pyproject.toml              # Configuration projet + dependances
+|-- pytest.ini                  # Configuration pytest
+|-- requirements.txt            # Dependances figees
+|-- Makefile                    # Commandes make
+|-- Dockerfile                  # Image Docker
+|-- docker-compose.yml          # Orchestration Docker
+`-- README.md                   # Ce fichier
 ```
 
 ### Rôle des Dossiers
@@ -277,7 +287,7 @@ Puls-Events-Culturs/
 | `api/` | API FastAPI avec endpoints RAG |
 | `src/` | Logique métier (config, logging, indexing, RAG) |
 | `scripts/` | Scripts d'automatisation (bootstrap, build index) |
-| `tests/` | Tests unitaires avec pytest |
+| `tests/` | Tests unitaires et fonctionnels avec pytest |
 | `data/` | Données (raw), données traitées (processed), index FAISS (index) |
 | `docs/` | Documentation supplémentaire |
 | `notebooks/` | Notebooks Jupyter pour exploration/prototypage |
@@ -611,5 +621,7 @@ pip install -e .
 ```bash
 python3.11 -m venv .venv
 ```
+
+
 
 
